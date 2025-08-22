@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form";
 import { joiResolver } from "@hookform/resolvers/joi";
-import { postSchema, type PostFormData } from "../schemas/postSchema";
+import { postSchema } from "../schemas/postSchema";
+import type { PostFormData } from "../types/post";
 import toast from "react-hot-toast";
 
 interface PostCreationFormProps {
@@ -43,7 +44,7 @@ export function PostCreationForm({ onSubmit }: PostCreationFormProps) {
         What's on your mind
       </h2>
 
-      <form onSubmit={handleSubmit(onFormSubmit)}>
+      <form onSubmit={handleSubmit(onFormSubmit)} noValidate>
         <div className="mb-6">
           <textarea
             {...register("description")}

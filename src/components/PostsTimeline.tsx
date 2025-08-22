@@ -1,8 +1,4 @@
-interface Post {
-  id: string;
-  timestamp: string;
-  content: string;
-}
+import type { Post } from "../types/post";
 
 interface PostsTimelineProps {
   posts: Post[];

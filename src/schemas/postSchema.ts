@@ -14,8 +14,3 @@ export const postSchema = Joi.object({
     "any.required": "Please select a date and time",
   }),
 });
-
-export type PostFormData = {
-  description: string;
-  scheduledTime: string;
-};

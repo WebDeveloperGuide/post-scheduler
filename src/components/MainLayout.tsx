@@ -1,19 +1,33 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Layout } from "./Layout";
 import { PostCreationForm } from "./PostCreationForm";
 import { PostsTimeline } from "./PostsTimeline";
 import { Divider } from "./Divider";
 import { Toaster } from "react-hot-toast";
-import type { PostFormData } from "../schemas/postSchema";
-
-interface Post {
-  id: string;
-  timestamp: string;
-  content: string;
-}
+import type { Post, PostFormData } from "../types/post";
+import {
+  savePostsToStorage,
+  loadPostsFromStorage,
+  getPublishedPosts,
+} from "../utils/storage";
+import { useCronService } from "../services/cronService";
 
 export function MainLayout() {
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [allPosts, setAllPosts] = useState<Post[]>([]);
+  const [publishedPosts, setPublishedPosts] = useState<Post[]>([]);
+
+  useEffect(() => {
+    const savedPosts = loadPostsFromStorage();
+    setAllPosts(savedPosts);
+    setPublishedPosts(getPublishedPosts(savedPosts));
+  }, []);
+
+  const handlePostsUpdate = useCallback((updatedPosts: Post[]) => {
+    setAllPosts(updatedPosts);
+    setPublishedPosts(getPublishedPosts(updatedPosts));
+  }, []);
+
+  const { startCron } = useCronService(allPosts, handlePostsUpdate);
 
   const handlePostSubmit = async (data: PostFormData) => {
     const newPost: Post = {
@@ -27,9 +41,26 @@ export function MainLayout() {
         hour12: true,
       }),
       content: data.description,
+      scheduledTime: data.scheduledTime,
+      status: "scheduled",
     };
 
-    setPosts((prev) => [newPost, ...prev]);
+    const updatedPosts = [newPost, ...allPosts];
+    setAllPosts(updatedPosts);
+    savePostsToStorage(updatedPosts);
+
+    const now = new Date();
+    const scheduledTime = new Date(data.scheduledTime);
+    if (scheduledTime.getTime() <= now.getTime()) {
+      const publishedPost = { ...newPost, status: "published" as const };
+      const finalPosts = [publishedPost, ...allPosts];
+      setAllPosts(finalPosts);
+      savePostsToStorage(finalPosts);
+      setPublishedPosts(getPublishedPosts(finalPosts));
+    } else {
+      setPublishedPosts(getPublishedPosts(updatedPosts));
+      startCron();
+    }
   };
 
   return (
@@ -37,7 +68,7 @@ export function MainLayout() {
       <Layout>
         <PostCreationForm onSubmit={handlePostSubmit} />
         <Divider />
-        <PostsTimeline posts={posts} />
+        <PostsTimeline posts={publishedPosts} />
       </Layout>
 
       <Toaster
