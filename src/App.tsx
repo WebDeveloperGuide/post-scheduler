@@ -1,13 +1,7 @@
-import "./App.css";
+import { MainLayout } from "./components/MainLayout";
 
 function App() {
-  return (
-    <>
-      <div>
-        <h1>Post Scheduler</h1>
-      </div>
-    </>
-  );
+  return <MainLayout />;
 }
 
 export default App;
