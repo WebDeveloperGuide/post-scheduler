@@ -3,6 +3,8 @@ import { Layout } from "./Layout";
 import { PostCreationForm } from "./PostCreationForm";
 import { PostsTimeline } from "./PostsTimeline";
 import { Divider } from "./Divider";
+import { Toaster } from "react-hot-toast";
+import type { PostFormData } from "../schemas/postSchema";
 
 interface Post {
   id: string;
@@ -11,19 +13,9 @@ interface Post {
 }
 
 export function MainLayout() {
-  const [posts, setPosts] = useState<Post[]>([
-    {
-      id: "1",
-      timestamp: "29/01/24 10:00pm",
-      content:
-        "Just finished reading an amazing book about design principles. It's incredible how small details can make such a huge impact on user experience!",
-    },
-  ]);
+  const [posts, setPosts] = useState<Post[]>([]);
 
-  const handlePostSubmit = (data: {
-    description: string;
-    scheduledTime: string;
-  }) => {
+  const handlePostSubmit = async (data: PostFormData) => {
     const newPost: Post = {
       id: Date.now().toString(),
       timestamp: new Date(data.scheduledTime).toLocaleString("en-GB", {
@@ -41,10 +33,37 @@ export function MainLayout() {
   };
 
   return (
-    <Layout>
-      <PostCreationForm onSubmit={handlePostSubmit} />
-      <Divider />
-      <PostsTimeline posts={posts} />
-    </Layout>
+    <>
+      <Layout>
+        <PostCreationForm onSubmit={handlePostSubmit} />
+        <Divider />
+        <PostsTimeline posts={posts} />
+      </Layout>
+
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: "#363636",
+            color: "#fff",
+          },
+          success: {
+            duration: 3000,
+            iconTheme: {
+              primary: "#10B981",
+              secondary: "#fff",
+            },
+          },
+          error: {
+            duration: 4000,
+            iconTheme: {
+              primary: "#EF4444",
+              secondary: "#fff",
+            },
+          },
+        }}
+      />
+    </>
   );
 }

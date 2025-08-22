@@ -1,15 +1,40 @@
+import { useForm } from "react-hook-form";
+import { joiResolver } from "@hookform/resolvers/joi";
+import { postSchema, type PostFormData } from "../schemas/postSchema";
+import toast from "react-hot-toast";
+
 interface PostCreationFormProps {
-  onSubmit: (data: { description: string; scheduledTime: string }) => void;
+  onSubmit: (data: PostFormData) => void;
 }
 
 export function PostCreationForm({ onSubmit }: PostCreationFormProps) {
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    onSubmit({
-      description: formData.get("description") as string,
-      scheduledTime: formData.get("scheduledTime") as string,
-    });
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+  } = useForm<PostFormData>({
+    resolver: joiResolver(postSchema),
+    mode: "onChange",
+  });
+
+  const onFormSubmit = async (data: PostFormData) => {
+    try {
+      await onSubmit(data);
+      reset();
+      toast.success("Post scheduled successfully!");
+    } catch (error) {
+      console.error("Failed to submit post:", error);
+      toast.error("Failed to schedule post. Please try again.");
+    }
+  };
+
+  const setMinDateTime = () => {
+    const now = new Date();
+    const localDateTime = new Date(
+      now.getTime() - now.getTimezoneOffset() * 60000
+    );
+    return localDateTime.toISOString().slice(0, 16);
   };
 
   return (
@@ -18,15 +43,24 @@ export function PostCreationForm({ onSubmit }: PostCreationFormProps) {
         What's on your mind
       </h2>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onFormSubmit)}>
         <div className="mb-6">
           <textarea
-            name="description"
-            className="w-full p-4 border border-gray-300 rounded-lg resize-y min-h-32 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            {...register("description")}
+            className={`w-full p-4 border rounded-lg resize-y min-h-32 focus:outline-none focus:ring-2 focus:ring-blue-100 ${
+              errors.description
+                ? "border-red-500 focus:border-red-500"
+                : "border-gray-300 focus:border-blue-500"
+            }`}
             placeholder="Description"
             rows={6}
-            required
+            disabled={isSubmitting}
           />
+          {errors.description && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.description.message}
+            </p>
+          )}
         </div>
 
         <div className="mb-6">
@@ -34,18 +68,40 @@ export function PostCreationForm({ onSubmit }: PostCreationFormProps) {
             Post By
           </label>
           <input
-            name="scheduledTime"
+            {...register("scheduledTime")}
             type="datetime-local"
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-            required
+            min={setMinDateTime()}
+            className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 ${
+              errors.scheduledTime
+                ? "border-red-500 focus:border-red-500"
+                : "border-gray-300 focus:border-blue-500"
+            }`}
+            disabled={isSubmitting}
           />
+          {errors.scheduledTime && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.scheduledTime.message}
+            </p>
+          )}
         </div>
 
         <button
           type="submit"
-          className="w-full p-4 bg-gray-100 border border-gray-300 rounded-lg text-gray-600 font-medium hover:bg-gray-200 hover:border-gray-400 transition-colors"
+          disabled={isSubmitting}
+          className={`w-full p-4 border rounded-lg font-medium transition-colors cursor-pointer ${
+            isSubmitting
+              ? "bg-gray-300 border-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-gray-100 border-gray-300 text-gray-600 hover:bg-gray-200 hover:border-gray-400"
+          }`}
         >
-          Submit
+          {isSubmitting ? (
+            <div className="flex items-center justify-center gap-2">
+              <div className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></div>
+              Saving...
+            </div>
+          ) : (
+            "Submit"
+          )}
         </button>
       </form>
     </section>
