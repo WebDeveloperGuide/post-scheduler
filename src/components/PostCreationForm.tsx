@@ -39,22 +39,22 @@ export function PostCreationForm({ onSubmit }: PostCreationFormProps) {
   };
 
   return (
-    <section className="p-8 md:p-8 p-6">
-      <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+    <section className="p-4 md:p-8">
+      <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-4 md:mb-6">
         What's on your mind
       </h2>
 
       <form onSubmit={handleSubmit(onFormSubmit)} noValidate>
-        <div className="mb-6">
+        <div className="mb-4 md:mb-6">
           <textarea
             {...register("description")}
-            className={`w-full p-4 border rounded-lg resize-y min-h-32 focus:outline-none focus:ring-2 focus:ring-blue-100 ${
+            className={`w-full p-3 md:p-4 border rounded-lg resize-y min-h-24 md:min-h-32 focus:outline-none focus:ring-2 focus:ring-blue-100 ${
               errors.description
                 ? "border-red-500 focus:border-red-500"
                 : "border-gray-300 focus:border-blue-500"
             }`}
             placeholder="Description"
-            rows={6}
+            rows={4}
             disabled={isSubmitting}
           />
           {errors.description && (
@@ -64,7 +64,7 @@ export function PostCreationForm({ onSubmit }: PostCreationFormProps) {
           )}
         </div>
 
-        <div className="mb-6">
+        <div className="mb-4 md:mb-6">
           <label className="block text-sm font-medium text-gray-600 mb-2">
             Post By
           </label>
@@ -72,7 +72,7 @@ export function PostCreationForm({ onSubmit }: PostCreationFormProps) {
             {...register("scheduledTime")}
             type="datetime-local"
             min={setMinDateTime()}
-            className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 ${
+            className={`w-full p-2 md:p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 ${
               errors.scheduledTime
                 ? "border-red-500 focus:border-red-500"
                 : "border-gray-300 focus:border-blue-500"
@@ -89,7 +89,7 @@ export function PostCreationForm({ onSubmit }: PostCreationFormProps) {
         <button
           type="submit"
           disabled={isSubmitting}
-          className={`w-full p-4 border rounded-lg font-medium transition-colors cursor-pointer ${
+          className={`w-full p-3 md:p-4 border rounded-lg font-medium transition-colors cursor-pointer ${
             isSubmitting
               ? "bg-gray-300 border-gray-300 text-gray-500 cursor-not-allowed"
               : "bg-gray-100 border-gray-300 text-gray-600 hover:bg-gray-200 hover:border-gray-400"
