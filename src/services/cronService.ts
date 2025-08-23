@@ -6,7 +6,7 @@ export function useCronService(
   posts: Post[],
   onPostsUpdate: (posts: Post[]) => void
 ) {
-  const intervalRef = useRef<number | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const postsRef = useRef<Post[]>(posts);
 
   // Keep postsRef updated with latest posts
